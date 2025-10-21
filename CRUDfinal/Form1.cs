@@ -123,6 +123,11 @@ namespace CRUDfinal
                 //if (item is CheckBox chk) chk.Checked = false;
                 //if (item is GroupBox || item is Panel) limpiarGrilla((Control)item);
             }
+            // foreach (Control item in control.Controls)
+            // {
+             //  if (item is TextBox txt) txt.Text = string.Empty;
+            //   if (item is ComboBox cmb) cmb.SelectedIndex = -1;
+            // }
         }
 
         private void dgvUsuarios_RowEnter(object sender, DataGridViewCellEventArgs e)
@@ -267,6 +272,66 @@ namespace CRUDfinal
 
 
             }
+        }
+
+        private void btnEliminar_Click(object sender, EventArgs e)
+        {
+           
+            if (btnEliminar.Text == "Eliminar")
+            {
+                // Verificar que haya algo seleccionado
+                if (dgvUsuarios.CurrentRow == null)
+                {
+                    MessageBox.Show("Seleccioná un usuario para eliminar.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+        
+                // Confirmar antes de eliminar
+                DialogResult respuesta = MessageBox.Show(
+                    "¿Estás segura de que querés eliminar este usuario?",
+                    "Confirmar eliminación",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+        
+                if (respuesta == DialogResult.No)
+                    return;
+        
+                try
+                {
+                    // Obtener el Id del usuario seleccionado
+                    int idUsuario = Convert.ToInt32(dgvUsuarios.CurrentRow.Cells["Id_Usuario"].Value);
+        
+                    // Buscar el usuario en la lista
+                    Usuarios eliminado = usuario.FirstOrDefault(u => u.Id_Usuario == idUsuario);
+        
+                    if (eliminado != null)
+                    {
+                        usuario.Remove(eliminado); // eliminar de la lista
+                        actualizarGrilla();        // refrescar grilla
+                        MessageBox.Show("Usuario eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("No se encontró el usuario seleccionado en la lista.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al eliminar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else // si está en modo Cancelar
+            {
+                btnAgregar.Text = "Agregar";
+                btnEliminar.Text = "Eliminar";
+                btnModificar.Text = "Modificar";
+                btnModificar.Visible = true;
+                btnAgregar.Visible = true;
+        
+                limpiarGrilla(this); // limpia todos los TextBox
+            }
+               
         }
 
 
