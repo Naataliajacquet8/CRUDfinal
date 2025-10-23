@@ -29,7 +29,8 @@ namespace CRUDfinal
         private void frmUsuarios_Load(object sender, EventArgs e)
         {
             actualizarGrilla();
-            
+            configurarComboBoxBusqueda();
+            dgvUsuarios.DataSource = null; // inicia vacío
         }
 
         void conectar()
