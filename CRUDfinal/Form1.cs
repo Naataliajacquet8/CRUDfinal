@@ -109,12 +109,7 @@ namespace CRUDfinal
             buscarPersonas();
             dgvUsuarios.DataSource = usuario;
             dgvUsuarios.Columns["Id_usuario"].Visible = false;
-
-            cmbBuscar.Items.Clear();
-            foreach (var u in usuario)
-            {
-                cmbBuscar.Items.Add(u.Nombre);
-            }
+            actualizarComboBox()
 
         }
 
@@ -473,6 +468,49 @@ namespace CRUDfinal
                 bloquearControles(gbDatosPersonales);
             }
         }
+         void actualizarComboBox()
+         {
+             cmbBuscar.Items.Clear();
+             foreach (var u in usuario)
+                 {
+                     cmbBuscar.Items.Add(u.Nombre);
+                  }
+         }
+
+        // CONFIGURAR AUTOCOMPLETADO
+     void configurarComboBoxBusqueda()
+     {
+         cmbBuscar.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+         cmbBuscar.AutoCompleteSource = AutoCompleteSource.CustomSource;
+         cmbBuscar.TextChanged += cmbBuscar_TextChanged; // evento para filtrar mientras escribe
+     }
+
+     private void cmbBuscar_TextChanged(object sender, EventArgs e)
+     {
+         string texto = cmbBuscar.Text.ToLower();
+    
+         if (string.IsNullOrWhiteSpace(texto))
+         {
+             dgvUsuarios.DataSource = null;
+             return;
+         }
+    
+         var coincidencias = usuario
+             .Where(u => u.Nombre.ToLower().Contains(texto) || u.Apellido.ToLower().Contains(texto))
+             .ToList();
+    
+         // Actualizar el autocompletado
+         AutoCompleteStringCollection sugerencias = new AutoCompleteStringCollection();
+         sugerencias.AddRange(coincidencias.Select(u => u.Nombre).ToArray());
+         cmbBuscar.AutoCompleteCustomSource = sugerencias;
+    
+         // Mostrar coincidencias en el DataGridView
+         dgvUsuarios.DataSource = null;
+         dgvUsuarios.DataSource = coincidencias;
+    
+         if (dgvUsuarios.Columns.Contains("Id_usuario"))
+             dgvUsuarios.Columns["Id_usuario"].Visible = false;
+     }
     
     }
 }
