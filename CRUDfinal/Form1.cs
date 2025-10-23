@@ -394,6 +394,79 @@ namespace CRUDfinal
             }
         }
 
+         private void btnEliminar_Click_1(object sender, EventArgs e)
+ {
+     if (btnEliminar.Text == "Eliminar")
+     {
+         // Verificar selección
+         if (dgvUsuarios.CurrentRow == null)
+         {
+             MessageBox.Show("Seleccioná un usuario para eliminar.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+             return;
+         }
+
+         // Confirmar
+         DialogResult respuesta = MessageBox.Show(
+             "¿Estás segura de que querés eliminar este usuario?",
+             "Confirmar eliminación",
+             MessageBoxButtons.YesNo,
+             MessageBoxIcon.Question
+         );
+
+         if (respuesta == DialogResult.No)
+             return;
+
+         try
+         {
+             // Obtener el ID del usuario seleccionado
+             int idUsuario = Convert.ToInt32(dgvUsuarios.CurrentRow.Cells["Id_usuario"].Value);
+
+             // ELIMINAR DE LA BASE DE DATOS
+             conectar();
+             string sql = "DELETE FROM Usuarios WHERE Id_usuario = ?";
+             using (OleDbCommand cmd = new OleDbCommand(sql, cn))
+             {
+                 cmd.Parameters.AddWithValue("?", idUsuario);
+                 int filas = cmd.ExecuteNonQuery();
+
+                 if (filas > 0)
+                 {
+                     MessageBox.Show("Usuario eliminado correctamente de la base de datos.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                 }
+                 else
+                 {
+                     MessageBox.Show("No se encontró el usuario en la base de datos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                 }
+             }
+
+             //ELIMINAR TAMBIÉN DE LA LISTA
+             Usuarios eliminado = usuario.FirstOrDefault(u => u.Id_usuario == idUsuario);
+             if (eliminado != null)
+             {
+                 usuario.Remove(eliminado);
+                 actualizarGrilla();
+             }
+         }
+         catch (Exception ex)
+         {
+             MessageBox.Show("Error al eliminar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+         }
+         finally
+         {
+             desconectar();
+         }
+     }
+     else // modo "Cancelar"
+     {
+         btnAgregar.Text = "Agregar";
+         btnEliminar.Text = "Eliminar";
+         btnModificar.Text = "Modificar";
+         btnModificar.Visible = true;
+         btnAgregar.Visible = true;
+         limpiarGrilla(gbDatosPersonales);
+     }
+ }
+    
 
     }
 }
