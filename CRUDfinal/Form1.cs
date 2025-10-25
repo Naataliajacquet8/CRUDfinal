@@ -492,34 +492,42 @@ namespace CRUDfinal
 
         private void cmbBuscar_TextChanged_1(object sender, EventArgs e)
         {
-            string texto = cmbBuscar.Text.ToLower();
+             if (chkMostrarTodos.Checked)
+                 return; // si está marcado, no filtramos
 
-            if (string.IsNullOrWhiteSpace(texto))
-            {
-                dgvUsuarios.DataSource = null;
-                return;
-            }
+             string texto = cmbBuscar.Text.ToLower();
+             if (string.IsNullOrWhiteSpace(texto))
+             {
+                 dgvUsuarios.DataSource = null;
+                 return;
+             }
 
-            var coincidencias = usuario
-                     .Where(u => u.Nombre.ToLower().StartsWith(texto)
-                              || u.Apellido.ToLower().StartsWith(texto)
-                              || u.DNI.ToString().StartsWith(texto))
-                     .ToList();
-
-            // Actualizar el autocompletado
-            AutoCompleteStringCollection sugerencias = new AutoCompleteStringCollection();
-            sugerencias.AddRange(coincidencias.Select(u => u.Nombre).ToArray());
-            sugerencias.AddRange(coincidencias.Select(u => u.Apellido).ToArray());
-            sugerencias.AddRange(coincidencias.Select(u => u.DNI.ToString()).ToArray());
-            cmbBuscar.AutoCompleteCustomSource = sugerencias;
-
-            // Mostrar coincidencias en el DataGridView
-            dgvUsuarios.DataSource = null;
-            dgvUsuarios.DataSource = coincidencias;
+             var filtrado = usuario
+                 .Where(u => u.Nombre.ToLower().Contains(texto) ||
+                             u.Apellido.ToLower().Contains(texto) ||
+                             u.DNI.ToString().StartsWith(texto))
+                 .ToList();
+            
+             dgvUsuarios.DataSource = null;
+             dgvUsuarios.DataSource = filtrado;
 
             if (dgvUsuarios.Columns.Contains("Id_usuario"))
                 dgvUsuarios.Columns["Id_usuario"].Visible = false;
         }
+        
+         private void chkMostrarTodos_CheckedChanged(object sender, EventArgs e)
+         {
+             if (chkMostrarTodos.Checked)
+             {
+                 // Muestra todos los usuarios sin filtrar
+                 actualizarGrilla();
+             }
+             else
+             {
+                 // Si se desmarca, vuelve a aplicar el filtro actual (si hay texto)
+                 cmbBuscar_TextChanged_1(null, null);
+             }
+         }
 
         private void cmbBuscar_KeyDown(object sender, KeyEventArgs e)
         {
